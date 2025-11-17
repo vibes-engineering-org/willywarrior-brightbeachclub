@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -170,6 +171,10 @@ export function NFTMintButton({
     null,
   );
 
+  // State for inline Manifold inputs
+  const [instanceIdInput, setInstanceIdInput] = React.useState<string>("");
+  const [tokenIdInput, setTokenIdInput] = React.useState<string>("");
+
   // Convert network name to chainId
   const targetChain = React.useMemo(() => {
     const foundChain = findChainByName(network);
@@ -215,18 +220,29 @@ export function NFTMintButton({
     error: writeError,
   } = useWriteContract();
 
-  // Build mint params
+  // Build mint params, merging inline inputs when provided
   const mintParams: MintParams = React.useMemo(
-    () => ({
-      contractAddress,
-      chainId,
-      provider: undefined, // Let auto-detection handle this
-      amount,
-      instanceId: manifoldParams?.instanceId,
-      tokenId: manifoldParams?.tokenId,
-      recipient: address,
-    }),
-    [contractAddress, chainId, amount, manifoldParams, address],
+    () => {
+      // For Manifold, merge input values with prop values
+      // If both instanceId values are provided, prefer input (for editing UX)
+      // If both tokenId values are provided, prefer input
+      const finalInstanceId = instanceIdInput || manifoldParams?.instanceId;
+      const finalTokenId = tokenIdInput || manifoldParams?.tokenId;
+
+      // When both are filled, prefer instanceId (consistent with getClaimForToken flows)
+      const shouldPreferInstanceId = finalInstanceId && finalTokenId;
+
+      return {
+        contractAddress,
+        chainId,
+        provider: undefined, // Let auto-detection handle this
+        amount,
+        instanceId: finalInstanceId,
+        tokenId: shouldPreferInstanceId ? undefined : finalTokenId,
+        recipient: address,
+      };
+    },
+    [contractAddress, chainId, amount, manifoldParams, address, instanceIdInput, tokenIdInput],
   );
 
   // Watch for transaction completion
@@ -609,11 +625,16 @@ export function NFTMintButton({
 
   // Quick win: validation helper
   const isReadyToMint = () => {
+    // For Manifold, also check that at least one ID is provided
+    const hasRequiredManifoldParams = contractInfo?.provider !== "manifold" ||
+      mintParams.instanceId || mintParams.tokenId;
+
     return (
       isConnected &&
       contractInfo &&
       !isLoading &&
       step === "sheet" &&
+      hasRequiredManifoldParams &&
       (!erc20Details || !erc20Details.needsApproval)
     );
   };
@@ -765,6 +786,38 @@ export function NFTMintButton({
                 <span className="text-neutral-500 dark:text-neutral-400">Provider</span>
                 <span className="font-semibold">{providerName}</span>
               </div>
+
+              {/* Manifold inline inputs when instanceId/tokenId not provided */}
+              {contractInfo?.provider === "manifold" &&
+                !manifoldParams?.instanceId &&
+                !manifoldParams?.tokenId && (
+                <div className="space-y-3 py-3 border-b">
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Manifold Parameters</div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                      Manifold NFTs require either instanceId or tokenId. Use getClaimForToken to find a specific token.
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Input
+                        placeholder="Instance ID"
+                        value={instanceIdInput}
+                        onChange={(e) => setInstanceIdInput(e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Input
+                        placeholder="Token ID"
+                        value={tokenIdInput}
+                        onChange={(e) => setTokenIdInput(e.target.value)}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="flex justify-between items-center py-3 border-b gap-2">
                 <span className="text-neutral-500 dark:text-neutral-400">Contract</span>
                 <span className="font-mono text-xs sm:text-sm">
