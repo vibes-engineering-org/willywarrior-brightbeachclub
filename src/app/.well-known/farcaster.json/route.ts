@@ -8,11 +8,11 @@ export async function GET() {
   const config = {
     accountAssociation: {
       header:
-        "eyJmaWQiOjEzNTk2LCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4ODE3MzE4RDZmRkY2NkExOGQ4M0ExMzc2QTc2RjZlMzBCNDNjODg4OSJ9",
+        "eyJmaWQiOjkxNDc5MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweERFQWNEZTZlQzI3RmQwY0Q5NzJjMTIzMkM0ZjBkNDE3MWRkYTIzNTcifQ",
       payload:
-        "eyJkb21haW4iOiJmYXJjYXN0ZXItbWluaWFwcC10ZW1wbGF0ZS52ZXJjZWwuYXBwIn0",
+        "eyJkb21haW4iOiJ3aWxseXdhcnJpb3ItYnJpZ2h0YmVhY2hjbHViLnZlcmNlbC5hcHAifQ",
       signature:
-        "MHg5ZjkyZTdkNjRmZTNhNTE4YTEzOTBmZTdlYzAwOWQzODUzZWM2N2RmOTZiYjg1MzAwOGRlZDExNjVmOGE5OGVlNDQyYmI0MDU3OTI0ZmEzOGE3N2NlYWRiYThiMTRiN2IzMTY5N2ZjYWVlZGM3MTE1YWNiMTFmYjc2Y2EzYTc0YzFj",
+        "ZJzVcqU0oeKYp24gYxnI3qz4PBCiPjW4cpjXB6UPvu1KDHi3cJQEuzQpQKaMa5/CquqU83dy4DPbR2TfkVCZ6xs=",
     },
     miniapp: {
       version: "1",
